@@ -2,7 +2,7 @@ import { useState } from "react";
 
 function App() {
   const [pizza, setPizza] = useState({
-    name: "Spicy Pepperoni",
+    name: "Spicy Pepp",
     toppings: ["Mushroom"],
   });
 
