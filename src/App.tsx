@@ -35,13 +35,29 @@ function App() {
     return () => controller.abort();
   }, []);
 
+  // optimization style meaning update UI first before updating backend
   const deleteUser = (user: User) => {
     const originalUsers = [...users];
-
     setUsers(users.filter((u) => u.id !== user.id));
-
     axios
       .delete("https://jsonplaceholder.typicode.com/users/" + user.id)
+      .catch((err) => {
+        setError(err.message);
+        setUsers(originalUsers);
+      });
+  };
+
+  // optimization style meaning update UI first before updating backend
+  const addUser = () => {
+    const originalUsers = [...users];
+    const newUser = { id: 0, name: "Cheng" };
+    setUsers([newUser, ...users]);
+    axios
+      .post("https://jsonplaceholder.typicode.com/users/", newUser)
+      .then(({ data: savedUser }) => {
+        // {data: savedUser} destruct res to {data} and alias data to savedUser
+        setUsers([savedUser, ...users]);
+      })
       .catch((err) => {
         setError(err.message);
         setUsers(originalUsers);
@@ -52,7 +68,9 @@ function App() {
     <>
       {error && <p className="text-danger">{error}</p>}
       {isLoading && <div className="spinner-border"></div>}
-
+      <button className="btn btn-primary mb-3" onClick={addUser}>
+        Add
+      </button>
       <ul className="list-group">
         {users.map((user) => (
           <li
