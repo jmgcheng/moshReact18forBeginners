@@ -1,5 +1,5 @@
-import axios, { CanceledError } from "axios";
 import { useEffect, useState } from "react";
+import apiClient, { CanceledError } from "./services/api-client";
 
 interface User {
   id: number;
@@ -15,8 +15,8 @@ function App() {
     const controller = new AbortController();
 
     setLoading(true);
-    axios
-      .get<User[]>("https://jsonplaceholder.typicode.com/users", {
+    apiClient
+      .get<User[]>("/users", {
         signal: controller.signal,
       })
       .then((res) => {
@@ -39,12 +39,10 @@ function App() {
   const deleteUser = (user: User) => {
     const originalUsers = [...users];
     setUsers(users.filter((u) => u.id !== user.id));
-    axios
-      .delete("https://jsonplaceholder.typicode.com/users/" + user.id)
-      .catch((err) => {
-        setError(err.message);
-        setUsers(originalUsers);
-      });
+    apiClient.delete("/users/" + user.id).catch((err) => {
+      setError(err.message);
+      setUsers(originalUsers);
+    });
   };
 
   // optimization style meaning update UI first before updating backend
@@ -52,8 +50,8 @@ function App() {
     const originalUsers = [...users];
     const newUser = { id: 0, name: "Cheng" };
     setUsers([newUser, ...users]);
-    axios
-      .post("https://jsonplaceholder.typicode.com/users/", newUser)
+    apiClient
+      .post("/users/", newUser)
       .then(({ data: savedUser }) => {
         // {data: savedUser} destruct res to {data} and alias data to savedUser
         setUsers([savedUser, ...users]);
@@ -69,15 +67,10 @@ function App() {
     const updatedUser = { ...user, name: user.name + "!" };
     setUsers(users.map((u) => (u.id === user.id ? updatedUser : u)));
 
-    axios
-      .patch(
-        "https://jsonplaceholder.typicode.com/users/" + user.id,
-        updatedUser
-      )
-      .catch((err) => {
-        setError(err.message);
-        setUsers(originalUsers);
-      });
+    apiClient.patch("/users/" + user.id, updatedUser).catch((err) => {
+      setError(err.message);
+      setUsers(originalUsers);
+    });
   };
 
   return (
